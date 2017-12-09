@@ -11,11 +11,12 @@ public class State implements Cloneable {
 		ONGOING, DRAW, PLAYER1_WIN, PLAYER2_WIN, ILLEGAL_MOVE, INVALID_COMMAND
 	}
 
-	private Board board;       // the game board
-	private int plies;         // number of plies made
-	private Player player1;    // player that goes first, is white
-	private Player player2;    // player that goes second, is black
-	private Player nextPlayer; // player that goes next
+	private Board board;                // the game board
+	private int plies;                  // number of plies made
+	private Player player1;             // player that goes first, is white
+	private Player player2;             // player that goes second, is black
+	private Player nextPlayer;          // player that goes next
+	private ArrayList<String> allMoves;   // array of all moves made so far, represented as strings
 
 	public Board getBoard() {
 		return board;
@@ -25,6 +26,17 @@ public class State implements Cloneable {
 		return plies;
 	}
 
+	/** Increment the number of plies. */
+	public void incPlies() {
+		plies++;
+	}
+	
+	/** Return the last move done in string form. If no moves have been made yet, return "None". */
+	public String getLastMove() {
+		if (allMoves.size() == 0) return "None";
+		return allMoves.get(allMoves.size() - 1);
+	}
+	
 	public Player getPlayer1() {
 		return player1;
 	}
@@ -37,18 +49,36 @@ public class State implements Cloneable {
 		return nextPlayer;
 	}
 
-	/** Initialize the beginning of the game.
-	 * Precondition: player1 must be white and player2 must be black. */
-	public State(Board b, Player player1, Player player2) {
-		if (player1.getColor() != Stone.Color.WHITE || player2.getColor() != Stone.Color.BLACK) {
-			throw new RuntimeException("player1 must be white and player2 must be black");
-		}
-		board = b;
+	public Player getPrevPlayer() {
+		return nextPlayer == player1 ? player2 : player1;
+	}
+	
+	/** Initialize the beginning of the game. Initially, player1, player2, and nextPlayer are null. They must be
+	 * added when the players are initialized. */
+	public State() {
+		board = new Board();
 		plies = 0;
+		player1 = null;
+		player2 = null;
+		nextPlayer = null;
+		allMoves = new ArrayList<String>();
+	}
+
+	/** Add player1 and player2 as players to this state. This should be called just after this state is initialized.
+	 * Precondition: player1 and player2 have not yet been linked to this state.
+	 *               player1 is white, and player2 is black. */
+	public void addPlayers(Player player1, Player player2) {
+		if (this.player1 != null || this.player2 != null || nextPlayer != null) {
+			throw new IllegalArgumentException("can't do addPlayers when players already initialized");
+		}
+		if (player1.getColor() != Stone.Color.WHITE || player2.getColor() != Stone.Color.BLACK) {
+			throw new IllegalArgumentException("wrong player colors");
+		}
 		this.player1 = player1;
 		this.player2 = player2;
 		nextPlayer = player1;
 	}
+
 
 	public String toString() {
 		String s = "" + plies + " moves made\n" +
@@ -62,20 +92,25 @@ public class State implements Cloneable {
 	 * and return the status describing the problem. */
 	public GameStatus makeMove(StatusGUI status) {
 		GameStatus gs;
-		int s = nextPlayer.makeMove(status);
-		if (s != 0) {
-			if (s == 1) gs = GameStatus.INVALID_COMMAND;
+		Player.ResultMove rm = nextPlayer.makeMove(status);
+		if (rm.result != 0) {
+			if (rm.result == 1) gs = GameStatus.INVALID_COMMAND;
 			else gs = GameStatus.ILLEGAL_MOVE;
 			return gs;
 		}
 		gs = getStatus(nextPlayer);
+		System.out.println(gs);
 		nextPlayer = nextPlayer == player1 ? player2 : player1;
 		plies += 1;
-		// System.out.println(Board.toGraphString(board.toGraph(nextPlayer.getColor())));
+		allMoves.add(rm.move.moveStr());
 		return gs;
 	}
 
-
+	/** Swap the next player. */
+	public void swapNextPlayer() {
+		nextPlayer = nextPlayer == player1 ? player2 : player1;
+	}
+	
 	/** Return true if there is a path from start to anything in ends in graph, false otherwise. This function uses
 	 * depth-first search.
 	 * Precondition: graph has a copy of start and end. */
@@ -150,27 +185,19 @@ public class State implements Cloneable {
 		return GameStatus.ONGOING;
 	}
 
-	/** Return the possible legal moves for the current player.
-	 * Precondition: the game is not yet over. */
-	public Move[] getPossibleMoves() {
-		ArrayList<Move> moves = new ArrayList<Move>();
-		return null;
-	}
-
 	/** Create a clone of this State */
 	public State clone() {
-		// clone the board first
-		Board newBoard = board.clone();
-		// clone the players with the new board
-		Player newPlayer1 = player1.clone(newBoard);
-		Player newPlayer2 = player2.clone(newBoard);
-		// create and tweak the fields of a new state
-		State newState = new State(newBoard, newPlayer1, newPlayer2);
+		State newState = new State();
+		newState.board = board.clone();
 		newState.plies = plies;
+		Player newPlayer1 = player1.clone(newState);
+		Player newPlayer2 = player2.clone(newState);
+		newState.addPlayers(newPlayer1, newPlayer2);
 		newState.nextPlayer = nextPlayer == player1 ? newPlayer1 : newPlayer2;
+		newState.allMoves = new ArrayList<String>(allMoves);
 		return newState;
 	}
-	
+
 	//	public static void main(String[] args) {
 	//		Board b = new Board();
 	//		State s = new State(b, new HumanPlayer(Stone.Color.WHITE, b), new HumanPlayer(Stone.Color.BLACK, b));

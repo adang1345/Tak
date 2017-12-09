@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -9,6 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -23,6 +25,8 @@ public class StatusGUI extends JPanel {
 	public static final Dimension TEXTFIELD_DIM = new Dimension((int)Tak.STATUS_DIM.getWidth(), 30);
 	public static final Border TEXTFIELD_BORDER = new LineBorder(Color.BLACK, 1);
 	public static final int PADDING = 15;
+	public static final Color PLIES_COLOR = new Color(0, 0, 102);
+	public static final int AI_DELAY = 0;  // minimum number of milliseconds AI must take to move
 
 	private Tak tak;
 	private State state;
@@ -32,8 +36,9 @@ public class StatusGUI extends JPanel {
 	private JLabel plies;
 	private JTextField textField;
 	private String statusMsg = "";
+	private JLabel lastMove;
 	private boolean gameOver;
-	private AbstractAction action; 
+	private AbstractAction action;
 
 	/** Return the text that is currently in the text field. */
 	public String getText() {
@@ -43,22 +48,20 @@ public class StatusGUI extends JPanel {
 	public JTextField getTextField() {
 		return textField;
 	}
-	
+
 	public StatusGUI(Tak tak, State state) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createCompoundBorder(new LineBorder(Tak.BORDER_COLOR, Tak.BORDER_THICKNESS),
 				new EmptyBorder(PADDING, PADDING, PADDING, PADDING)));
 		setPreferredSize(Tak.STATUS_DIM);
 		setBackground(BACKGROUND_COLOR);
-		
+
 		this.tak = tak;
 		this.state = state;
 		gameOver = false;
 		action = new EnterMoveListener();
-		
-		do updateStatus();
-		while (state.getNextPlayer() instanceof AIPlayer);
 
+		updateStatus();
 	}
 
 	/* Listener for when the user presses enter to input a move. */
@@ -93,6 +96,11 @@ public class StatusGUI extends JPanel {
 		}
 	}
 
+	/** Return s with the characters '>' and '<' converted to escaped HTML. */
+	private static String escapeHtml(String s) {
+		return s.replace("<", "&lt;").replace(">", "&gt;");
+	}
+	
 	/* Update status  */
 	private void updateStatus() {
 		removeAll();
@@ -134,11 +142,17 @@ public class StatusGUI extends JPanel {
 		add(player2Info);
 
 		// add plies
-		plies = new JLabel("<html>Plies Done: " + state.getPlies() + "<br />&nbsp;</html>");
+		plies = new JLabel("Plies Done: " + state.getPlies());
 		plies.setFont(PLAYER_FONT);
-		plies.setForeground(new Color(0, 0, 102));
+		plies.setForeground(PLIES_COLOR);
 		add(plies);
 
+		// add last move made
+		lastMove = new JLabel("<html>Last Move: " + escapeHtml(state.getLastMove()) + "<br />&nbsp;</html>");
+		lastMove.setFont(PLAYER_FONT);
+		lastMove.setForeground(PLIES_COLOR);
+		add(lastMove);
+		
 		// Add text field. Keep previous one if it was an error. Make it uneditable if game is over or AI player's turn
 		// is next.
 		if (textField == null || statusMsg.equals("")) {
@@ -163,19 +177,51 @@ public class StatusGUI extends JPanel {
 		errorLabel.setForeground(Color.RED);
 		add(errorLabel);
 
-		// make move automatically if AI player
-		if (state.getNextPlayer() instanceof AIPlayer) {
-			state.makeMove(this);
-			tak.updateBoard();
-		}
-
 		revalidate();
 		repaint();
+
+		/** Start new thread for AI player to do its thing if game is not already over. */
+		if (state.getNextPlayer() instanceof AIPlayer &&
+				(state.getPlies() == 0 || state.getStatus(state.getPrevPlayer()) == State.GameStatus.ONGOING)) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					autoMove();
+				}
+			});
+		}
 	}
 
-	/* If current player is AI player, trigger it to make a move and repeat. Otherwise, do nothing. */
-	private void startAutoMoves() {
-
+	/** Trigger the next player to move automatically.
+	 * Precondition: the next player is an AIPlayer and the game is not yet over */
+	private void autoMove() {
+		if (!(state.getNextPlayer() instanceof AIPlayer)) throw new RuntimeException("can't autostart human player");
+		long startTime = System.currentTimeMillis();
+		State.GameStatus gs = state.makeMove(this);
+		long endTime = System.currentTimeMillis();
+		try {
+			TimeUnit.MILLISECONDS.sleep(AI_DELAY - startTime + endTime);
+		} catch (InterruptedException e) {}
+		switch (gs) {
+		case PLAYER1_WIN:
+			statusMsg = "Player 1 Wins";
+			gameOver = true;
+			break;
+		case PLAYER2_WIN:
+			statusMsg = "Player 2 Wins";
+			gameOver = true;
+			break;
+		case DRAW:
+			statusMsg = "Game is a Draw";
+			gameOver = true;
+			break;
+		case ONGOING:
+			break;
+		default:
+			statusMsg = "Internal Error for AI Move";
+		}
+		tak.updateBoard();
+		tak.updateStack();
+		updateStatus();
 	}
 
 }

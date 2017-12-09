@@ -1,7 +1,6 @@
 import java.awt.*;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 
 
 /* GUI for the Tak game. */
@@ -28,7 +27,7 @@ public class Tak extends JFrame {
 	private Tak(State s) {
 		// basic window properties
 		super("Tak");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_DIM);
 		setResizable(false);
 		getContentPane().setBackground(BACKGROUND_COLOR);
@@ -106,15 +105,12 @@ public class Tak extends JFrame {
 
 	public static void main(String[] args) {
 		// 2 human players
-		Board b = new Board();
-//		b.addStone(new Stone(Stone.Color.BLACK, Stone.Type.REGULAR, Stone.Status.FLAT), 0, 0);
-//		for (int i = 0; i < 10; i++) {
-//			Stone.Color c = i % 2 == 0 ? Stone.Color.BLACK : Stone.Color.WHITE;
-//			b.addStone(new Stone(c, Stone.Type.REGULAR, Stone.Status.FLAT), 0, 1);
-//			b.moveStack(1, Board.Direction.WEST, new int[] {1}, 0, 1);
-//		}
-
-		State s = new State(b, new HumanPlayer(Stone.Color.WHITE, b), new HumanPlayer(Stone.Color.BLACK, b));
+		State s = new State();
+		Player p1human = new HumanPlayer(Stone.Color.WHITE, s, Player.Strategy.HUMAN);
+		Player p1ai = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.RANDOM);
+		Player p2human = new HumanPlayer(Stone.Color.BLACK, s, Player.Strategy.HUMAN);
+		Player p2ai = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.RANDOM);
+		s.addPlayers(p1ai, p2ai);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				new Tak(s);
