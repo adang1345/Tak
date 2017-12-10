@@ -182,7 +182,7 @@ public class StatusGUI extends JPanel {
 
 		/** Start new thread for AI player to do its thing if game is not already over. */
 		if (state.getNextPlayer() instanceof AIPlayer &&
-				(state.getPlies() == 0 || state.getStatus(state.getPrevPlayer()) == State.GameStatus.ONGOING)) {
+				(state.getStatus(state.getPrevPlayer()) == State.GameStatus.ONGOING)) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					autoMove();

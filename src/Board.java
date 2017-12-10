@@ -48,7 +48,7 @@ public class Board implements Cloneable {
 		}
 		cells = newCells;
 	}
-	
+
 	/** Return the stones in the cell at (row, col). Throws IllegalMove if out of bounds. */
 	public LinkedList<Stone> cellContents(int row, int col) {
 		try {
@@ -83,18 +83,12 @@ public class Board implements Cloneable {
 		if (s == null) return null;
 		else return s.getColor();
 	}
-	
-	/** Return the bottom stone of the list of stones s, null if there is none. */
-	private Stone bottomStone(LinkedList<Stone> s) {
-		if (s.isEmpty()) return null;
-		else return s.getLast();
-	}
 
 	/** Add a new stone to the board at (row, col). Raises IllegalMove if this move is impossible.
 	 * Precondition: row and col are less than SIZE */
 	public void addStone(Stone stone, int row, int col) {
 		if (topStone(row, col) != null) {
-			throw new IllegalMove("Cannot place new stone onto occupied cell");
+			throw new IllegalMove("Cannot place new stone onto occupied cell (" + row + "," + col + ")");
 		} else if (!isValidCell(row, col)) {
 			throw new IllegalMove("Out of bounds");
 		} else cellContents(row, col).addFirst(stone);
@@ -142,7 +136,7 @@ public class Board implements Cloneable {
 				contents.get(n-1).getType() == Stone.Type.REGULAR) {
 			throw new IllegalMove("Can't topple standing stone");
 		}
-		
+
 		// move is valid at this point
 		if (topStoneNext != null && topStoneNext.getStatus() == Stone.Status.STANDING) {
 			topStoneNext.setStatus(Stone.Status.FLAT);
@@ -193,13 +187,19 @@ public class Board implements Cloneable {
 		if (s1 == null || s2 == null) return false;
 		return c == s1.getColor() && c == s2.getColor() && s1.isPartOfPath() && s2.isPartOfPath();		
 	}
-	
+
 	/** Return true if the player with color c owns the stack at (row,col) and this stack is part of the path. */
 	private boolean ownsPath(Stone.Color c, int row, int col) {
 		Stone s = topStone(row, col);
 		return s != null && s.getColor() == c && s.isPartOfPath();
 	}
-	
+
+	/** Return true if the player with color c owns that stack at (row,col). */
+	public boolean ownsStack(Stone.Color c, int row, int col) {
+		Stone s = topStone(row, col);
+		return s != null && s.getColor() == c;
+	}
+
 	/** Return the number of stacks owned by a player with color c that are part of a path. */
 	public int numOwnedPath(Stone.Color c) {
 		int n = 0;
@@ -210,17 +210,28 @@ public class Board implements Cloneable {
 		}
 		return n;
 	}
-	
+
+	/** Return the number of stacks owned by the player with color c. */
+	public int numOwnedStacks(Stone.Color c) {
+		int n = 0;
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				if (ownsStack(c, i, j)) n++;
+			}
+		}
+		return n;
+	}
+
 	/** Return true if this board is full, false otherwise. */
 	public boolean isFull() {
 		for (int i = 0; i < SIZE; i++) {
 			for (int j = 0; j < SIZE; j++) {
-				if (topStone(i, j) != null) return false;
+				if (topStone(i, j) == null) return false;
 			}
 		}
 		return true;
 	}
-	
+
 	/** Return an array of coordinates of all empty cells on this board. */
 	public ArrayList<Pair> emptyCells() {
 		ArrayList<Pair> cells = new ArrayList<Pair>();
@@ -231,7 +242,7 @@ public class Board implements Cloneable {
 		}
 		return cells;
 	}
-	
+
 	/** Return a graph representation of all the paths in this board for the player with color c. This graph is
 	 * represented as a HashMap from a Pair to a set of Pairs that the first pair is next to. */
 	public HashMap<Pair,HashSet<Pair>> toGraph(Stone.Color c) {
@@ -264,7 +275,7 @@ public class Board implements Cloneable {
 		}
 		return g;
 	}
-	
+
 	/** Return a string representation of a graph */
 	public static String toGraphString(HashMap<Pair,HashSet<Pair>> g) {
 		String s = "";
@@ -277,7 +288,7 @@ public class Board implements Cloneable {
 		}
 		return s;
 	}
-	
+
 	public String toString() {
 		String s = "";
 		for (int i = 0; i < SIZE; i++) {
@@ -289,7 +300,7 @@ public class Board implements Cloneable {
 		}
 		return s;
 	}
-	
+
 	/** Return a clone of this board. */
 	public Board clone() {
 		return new Board(cells);
@@ -318,7 +329,7 @@ public class Board implements Cloneable {
 		// b1.moveStack(1, Direction.NORTH, arr1, 4, 4); out of bounds on north
 		b1.moveStack(1, Direction.SOUTH, arr1, 4, 4);
 		// System.out.println(b1.toString());
-		
+
 		// tests for large stacks, standing stones
 		Board b2 = new Board();
 		b2.addStone(new Stone(Stone.Color.BLACK, Stone.Type.REGULAR, Stone.Status.FLAT), 0, 0);
@@ -340,7 +351,7 @@ public class Board implements Cloneable {
 		b2.moveStack(1, Direction.WEST, arr1, 0, 3); // place standing stone on top of stack
 		// b2.moveStack(1, Direction.EAST, new int[] {1}, 0, 1); topple standing stone on top of others
 		b2.moveStack(4, Direction.NORTH, new int[] {1,1,1,1}, 0, 2);
-		
+
 		// tests for capstone
 		b2.addStone(new Stone(Stone.Color.BLACK, Stone.Type.CAPSTONE, Stone.Status.STANDING), 0, 2);
 		// b2.moveStack(1, Direction.SOUTH, arr1, 1, 2); can't capture capstone
@@ -356,7 +367,7 @@ public class Board implements Cloneable {
 		b2.addStone(new Stone(Stone.Color.WHITE, Stone.Type.REGULAR, Stone.Status.STANDING), 4, 4);
 		b2.moveStack(2, Direction.EAST, new int[] {1,1}, 4, 2);
 		System.out.println(b2);
-		
+
 	}
 
 }

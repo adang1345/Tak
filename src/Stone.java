@@ -11,7 +11,11 @@ public class Stone implements Cloneable {
 	
 	/* color of a piece */
 	public static enum Color {
-		WHITE, BLACK
+		WHITE, BLACK;
+		public Color other() {
+			if (this == WHITE) return BLACK;
+			else return WHITE;
+		}
 	}
 	
 	/* type of a piece */

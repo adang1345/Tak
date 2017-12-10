@@ -5,8 +5,8 @@ public class HumanPlayer extends Player {
 
 	/** Create a human player.
 	 * Precondition: strategy is Strategy.HUMAN */
-	public HumanPlayer(Stone.Color c, State s, Strategy strategy) {
-		super(c, s, strategy);
+	public HumanPlayer(Stone.Color c, State s, Strategy strategy, int depth) {
+		super(c, s, strategy, depth);
 		if (strategy != Strategy.HUMAN) throw new IllegalArgumentException("human strategy");
 	}
 

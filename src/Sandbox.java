@@ -50,10 +50,11 @@ public class Sandbox {
 	}
 	
 	public static void main(String[] args) {
-		B b = new B(1);
-		A a = b.clone();
-		System.out.println(b == a);
-		System.out.println(b.getI() == a.getI());
+//		B b = new B(1);
+//		A a = b.clone();
+//		System.out.println(b == a);
+//		System.out.println(b.getI() == a.getI());
+
 	}
 	
 }

@@ -30,19 +30,28 @@ public class State implements Cloneable {
 	public void incPlies() {
 		plies++;
 	}
-	
+
 	/** Return the last move done in string form. If no moves have been made yet, return "None". */
 	public String getLastMove() {
 		if (allMoves.size() == 0) return "None";
 		return allMoves.get(allMoves.size() - 1);
 	}
-	
+
 	public Player getPlayer1() {
 		return player1;
 	}
 
 	public Player getPlayer2() {
 		return player2;
+	}
+
+	public Player getPlayer(Stone.Color c) {
+		switch (c) {
+		case WHITE:
+			return player1;
+		default:
+			return player2;
+		}
 	}
 
 	public Player getNextPlayer() {
@@ -52,7 +61,7 @@ public class State implements Cloneable {
 	public Player getPrevPlayer() {
 		return nextPlayer == player1 ? player2 : player1;
 	}
-	
+
 	/** Initialize the beginning of the game. Initially, player1, player2, and nextPlayer are null. They must be
 	 * added when the players are initialized. */
 	public State() {
@@ -99,7 +108,7 @@ public class State implements Cloneable {
 			return gs;
 		}
 		gs = getStatus(nextPlayer);
-		System.out.println(gs);
+		//System.out.println(gs);
 		nextPlayer = nextPlayer == player1 ? player2 : player1;
 		plies += 1;
 		allMoves.add(rm.move.moveStr());
@@ -110,7 +119,7 @@ public class State implements Cloneable {
 	public void swapNextPlayer() {
 		nextPlayer = nextPlayer == player1 ? player2 : player1;
 	}
-	
+
 	/** Return true if there is a path from start to anything in ends in graph, false otherwise. This function uses
 	 * depth-first search.
 	 * Precondition: graph has a copy of start and end. */
@@ -198,19 +207,4 @@ public class State implements Cloneable {
 		return newState;
 	}
 
-	//	public static void main(String[] args) {
-	//		Board b = new Board();
-	//		State s = new State(b, new HumanPlayer(Stone.Color.WHITE, b), new HumanPlayer(Stone.Color.BLACK, b));
-	//		System.out.println(s);
-	//		while (true) {
-	//			System.out.println("Player1's Turn\n--------------");
-	//			s.player1.makeMove();
-	//			s.moves += 1;
-	//			System.out.println(s);
-	//			System.out.println("Player2's Turn\n--------------");
-	//			s.player2.makeMove();
-	//			s.moves += 1;
-	//			System.out.println(s);
-	//		}
-	//	}
 }

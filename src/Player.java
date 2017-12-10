@@ -5,14 +5,31 @@ public abstract class Player {
 
 	/** Supported playing strategies of a player */
 	public static enum Strategy {
-		HUMAN, RANDOM
+		HUMAN,
+		RANDOM,
+		
+		// maximizes number of own controlled cells
+		SELFISH,
+		// minimizes opponent's controlled cells
+		ATTACKER,
+		// maximizes # own cells - # opponent's cells
+		SELFISH_ATTACKER,
+		// maximizes number of own pieces kept
+		STINGY,
+		// Maximize total number of my controlled pieces minus the total number of opponent's controlled pieces.
+		GATHERER,
+		// maximize the number of adjacent pairs of flat controlled cells (allowing double-counting)
+		PATHBUILDER,
+		// combination of pathbuilder and gatherer, weighing stacks of multiple own more
+		PATHBUILDER_GATHERER
 	}
-	
+
 	protected int stones;  // # stones in inventory
 	protected int capstones;  // # capstones in inventory
 	protected Stone.Color color;  // color of player
 	protected State state;  // board that this player can access
 	protected Strategy strategy; // strategy this player uses, null if human player
+	protected int depth;
 
 	public int getStones() {
 		return stones;
@@ -35,14 +52,16 @@ public abstract class Player {
 			this.move = move;
 		}
 	}
-	
+
 	/** Initialize a player whose stone color is c on board b. */
-	protected Player(Stone.Color c, State s, Strategy strategy) {
+	protected Player(Stone.Color c, State s, Strategy strategy, int depth) {
+		if (depth < 0) throw new IllegalArgumentException("invalid depth");
 		stones = NUM_STONES;
 		capstones = NUM_CAPSTONES;
 		color = c;
 		state = s;
 		this.strategy = strategy;
+		this.depth = depth;
 	}
 
 	/** Return true if this player owns a stack at (row,col), false otherwise. */
@@ -91,7 +110,8 @@ public abstract class Player {
 		Class<? extends Player> subclass = this.getClass();
 		Player newPlayer;
 		try {
-			newPlayer = subclass.getDeclaredConstructor(Stone.Color.class, State.class, Strategy.class).newInstance(color, s, strategy);
+			newPlayer = subclass.getDeclaredConstructor(Stone.Color.class, State.class, Strategy.class, int.class)
+					.newInstance(color, s, strategy, depth);
 		} catch (Exception e) {
 			throw new RuntimeException("can't initialize new player");
 		}
