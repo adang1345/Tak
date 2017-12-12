@@ -21,7 +21,7 @@ public class Tak extends JFrame {
 
 	private BoardGUI boardGUI;
 	private StackGUI stackGUI;
-	private JPanel statusGUI;
+	private StatusGUI statusGUI;
 	private State state;
 
 	private Tak(State s) {
@@ -52,6 +52,7 @@ public class Tak extends JFrame {
 		add(statusGUI, c);
 
 		setVisible(true);
+		statusGUI.getTextField().requestFocusInWindow();
 	}
 
 	/* Update the stack by having it display the stack at (row,col). */
@@ -113,17 +114,18 @@ public class Tak extends JFrame {
 		Player p1attacker = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.ATTACKER, 3);
 		Player p1stingy = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.STINGY, 3);
 		Player p1gatherer = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.GATHERER, 3);
-		Player p1pathbuilder = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.PATHBUILDER, 3);
-		Player p1pathbuildergatherer = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.PATHBUILDER_GATHERER, 3);
+		Player p1clusterbuilder = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.CLUSTERBUILDER, 3);
+		Player p1clusterbuildergatherer = new AIPlayer(Stone.Color.WHITE, s, Player.Strategy.CLUSTERBUILDER_GATHERER, 3);
 		Player p2human = new HumanPlayer(Stone.Color.BLACK, s, Player.Strategy.HUMAN, 0);
 		Player p2random = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.RANDOM, 0);
 		Player p2selfish = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.SELFISH, 3);
+		Player p2attacker = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.ATTACKER, 3);
 		Player p2selfishattacker = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.SELFISH_ATTACKER, 3);
 		Player p2stingy = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.STINGY, 3);
 		Player p2gatherer = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.GATHERER, 3);
-		Player p2pathbuilder = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.PATHBUILDER, 3);
-		Player p2pathbuildergatherer = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.PATHBUILDER_GATHERER, 3);
-		s.addPlayers(p1gatherer, p2selfishattacker);
+		Player p2clusterbuilder = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.CLUSTERBUILDER, 3);
+		Player p2clusterbuildergatherer = new AIPlayer(Stone.Color.BLACK, s, Player.Strategy.CLUSTERBUILDER_GATHERER, 3);
+		s.addPlayers(p1human, p2human);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				new Tak(s);

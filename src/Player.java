@@ -19,9 +19,9 @@ public abstract class Player {
 		// Maximize total number of my controlled pieces minus the total number of opponent's controlled pieces.
 		GATHERER,
 		// maximize the number of adjacent pairs of flat controlled cells (allowing double-counting)
-		PATHBUILDER,
-		// combination of pathbuilder and gatherer, weighing stacks of multiple own more
-		PATHBUILDER_GATHERER
+		CLUSTERBUILDER,
+		// combination of clusterbuilder and gatherer, weighing stacks of multiple own more
+		CLUSTERBUILDER_GATHERER
 	}
 
 	protected int stones;  // # stones in inventory

@@ -189,7 +189,7 @@ public class Board implements Cloneable {
 	}
 
 	/** Return true if the player with color c owns the stack at (row,col) and this stack is part of the path. */
-	private boolean ownsPath(Stone.Color c, int row, int col) {
+	public boolean ownsPath(Stone.Color c, int row, int col) {
 		Stone s = topStone(row, col);
 		return s != null && s.getColor() == c && s.isPartOfPath();
 	}

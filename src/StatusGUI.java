@@ -179,6 +179,7 @@ public class StatusGUI extends JPanel {
 
 		revalidate();
 		repaint();
+		textField.requestFocusInWindow();
 
 		/** Start new thread for AI player to do its thing if game is not already over. */
 		if (state.getNextPlayer() instanceof AIPlayer &&

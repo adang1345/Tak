@@ -100,18 +100,19 @@ public class AIPlayer extends Player {
 				throw new RuntimeException("evaluate error");
 			}
 		}
-		float e = RANDOM.nextFloat();
+		float e = RANDOM.nextFloat() / 2;
 		switch (strategy) {
 		case RANDOM:
 			return RANDOM.nextInt();
 		case SELFISH:
-			e += s.getBoard().numOwnedStacks(c);
+			e += s.getBoard().numOwnedStacks(c) + 3 * s.getBoard().numOwnedPath(c);
 			return e;
 		case ATTACKER:
 			e -= s.getBoard().numOwnedStacks(c.other());
 			return e;
 		case SELFISH_ATTACKER:
-			e += s.getBoard().numOwnedStacks(c) - s.getBoard().numOwnedStacks(c.other());
+			e += s.getBoard().numOwnedStacks(c) + 3 * s.getBoard().numOwnedPath(c)
+			   - s.getBoard().numOwnedStacks(c.other()) - 3 * s.getBoard().numOwnedPath(c.other());
 			return e;
 		case STINGY:
 			e += s.getPlayer(c).stones + s.getPlayer(c).capstones;
@@ -120,18 +121,24 @@ public class AIPlayer extends Player {
 			for (int i = 0; i < Board.SIZE; i++) {
 				for (int j = 0; j < Board.SIZE; j++) {
 					Stone.Color topColor = s.getBoard().topColor(i, j);
-					if (topColor == c) e += s.getBoard().cellContents(i, j).size();
-					else if (topColor != null) e -= s.getBoard().cellContents(i, j).size();
+					if (topColor == c) {
+						e += s.getBoard().cellContents(i, j).size();
+						if (s.getBoard().ownsPath(c, i, j)) e += 3;
+					}
+					else if (topColor != null) {
+						e -= s.getBoard().cellContents(i, j).size();
+						if (s.getBoard().ownsPath(c.other(), i, j)) e -= 3;
+					}
 				}
 			}
 			return e;
-		case PATHBUILDER:
+		case CLUSTERBUILDER:
 			HashMap<Pair,HashSet<Pair>> g = s.getBoard().toGraph(c);
 			for (Entry<Pair,HashSet<Pair>> entry : g.entrySet()) {
 				e += entry.getValue().size();
 			}
 			return e;
-		case PATHBUILDER_GATHERER:
+		case CLUSTERBUILDER_GATHERER:
 			g = s.getBoard().toGraph(c);
 			for (Entry<Pair,HashSet<Pair>> entry : g.entrySet()) {
 				e += 2 * entry.getValue().size();
@@ -140,16 +147,12 @@ public class AIPlayer extends Player {
 				for (int j = 0; j < Board.SIZE; j++) {
 					Stone.Color topColor = s.getBoard().topColor(i, j);
 					if (topColor == c) {
-						for (Stone stone : s.getBoard().cellContents(i, j)) {
-							if (stone.getColor() == c) e += 2;
-							else e++;
-						}
+						e += s.getBoard().cellContents(i, j).size();
+						if (s.getBoard().ownsPath(c, i, j)) e += 3;
 					}
 					else if (topColor != null) {
-						for (Stone stone : s.getBoard().cellContents(i, j)) {
-							if (stone.getColor() == c) e--;
-							else e -= 2;
-						}
+						e -= s.getBoard().cellContents(i, j).size();
+						if (s.getBoard().ownsPath(c.other(), i, j)) e -= 3;
 					}
 				}
 			}
@@ -249,7 +252,7 @@ public class AIPlayer extends Player {
 		MoveStateEval bestChild = null;
 
 		int branchesSeen = 0;
-		
+
 		while (!children.isEmpty()) {
 			MoveStateEval child = children.poll();
 			branchesSeen++;
@@ -280,7 +283,7 @@ public class AIPlayer extends Player {
 		MoveStateEval bestChild = null;
 
 		int branchesSeen = 0;
-		
+
 		while (!children.isEmpty()) {
 			MoveStateEval child = children.poll();
 			branchesSeen++;
