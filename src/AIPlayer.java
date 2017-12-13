@@ -105,17 +105,13 @@ public class AIPlayer extends Player {
 		case RANDOM:
 			return RANDOM.nextInt();
 		case SELFISH:
-			e += s.getBoard().numOwnedStacks(c) + 3 * s.getBoard().numOwnedPath(c);
+			e += s.getBoard().numOwnedStacks(c);
 			return e;
 		case ATTACKER:
 			e -= s.getBoard().numOwnedStacks(c.other());
 			return e;
 		case SELFISH_ATTACKER:
-			e += s.getBoard().numOwnedStacks(c) + 3 * s.getBoard().numOwnedPath(c)
-			   - s.getBoard().numOwnedStacks(c.other()) - 3 * s.getBoard().numOwnedPath(c.other());
-			return e;
-		case STINGY:
-			e += s.getPlayer(c).stones + s.getPlayer(c).capstones;
+			e += s.getBoard().numOwnedStacks(c) - s.getBoard().numOwnedStacks(c.other());
 			return e;
 		case GATHERER:
 			for (int i = 0; i < Board.SIZE; i++) {
@@ -123,11 +119,8 @@ public class AIPlayer extends Player {
 					Stone.Color topColor = s.getBoard().topColor(i, j);
 					if (topColor == c) {
 						e += s.getBoard().cellContents(i, j).size();
-						if (s.getBoard().ownsPath(c, i, j)) e += 3;
-					}
-					else if (topColor != null) {
+					} else if (topColor != null) {
 						e -= s.getBoard().cellContents(i, j).size();
-						if (s.getBoard().ownsPath(c.other(), i, j)) e -= 3;
 					}
 				}
 			}
@@ -148,11 +141,8 @@ public class AIPlayer extends Player {
 					Stone.Color topColor = s.getBoard().topColor(i, j);
 					if (topColor == c) {
 						e += s.getBoard().cellContents(i, j).size();
-						if (s.getBoard().ownsPath(c, i, j)) e += 3;
-					}
-					else if (topColor != null) {
+					} else if (topColor != null) {
 						e -= s.getBoard().cellContents(i, j).size();
-						if (s.getBoard().ownsPath(c.other(), i, j)) e -= 3;
 					}
 				}
 			}
@@ -218,7 +208,7 @@ public class AIPlayer extends Player {
 							String stackMoveString = "M(" + i + "," + j + ")" + d + n + "[" + dropPattern + "]";
 							Move stackMove = new Move(stackMoveString);
 							State stackState;
-							try {  // skip illegal moves
+							try {
 								stackState = childState(s, stackMove);
 							} catch (Board.IllegalMove e) {
 								continue;
@@ -230,7 +220,6 @@ public class AIPlayer extends Player {
 				}
 			}
 		}
-		//for (MoveStateEval entry : queue) System.out.println(entry.move);
 		return queue;
 	}
 
@@ -241,35 +230,26 @@ public class AIPlayer extends Player {
 	private static MoveStateEval maximizer(MoveStateEval mse, double alpha, double beta, int depth, Stone.Color c, Player.Strategy strategy) {
 		// terminal cases
 		if (depth == 0) return mse;
-		//if (depth == 3) System.out.println(mse.state.getBoard());
 		PriorityQueue<MoveStateEval> children = getPossibleMoves(mse.state, true, c, strategy);
-		//if (depth == 3) System.out.println(mse.state.getBoard());
-		//System.out.println("maximizer: " + mse.state.getNextPlayer().color);
 		if (children.size() == 0) return mse;
 
 		// invariant: if bestChild is not null, then bestChild.eval = value
 		double value = Integer.MIN_VALUE;
 		MoveStateEval bestChild = null;
 
-		int branchesSeen = 0;
-
 		while (!children.isEmpty()) {
 			MoveStateEval child = children.poll();
-			branchesSeen++;
 			MoveStateEval childMin = minimizer(child, alpha, beta, depth-1, c, strategy);
-			//System.out.println("minimizer gave back " + childMin.eval);
 			if (childMin.eval > value || bestChild == null) {
 				bestChild = child;
 				bestChild.eval = childMin.eval;
 				value = bestChild.eval;
 			}
 			if (value >= beta) {
-				//System.out.println("maximizer branches: " + branchesSeen);
 				return bestChild;
 			}
 			alpha = Math.max(alpha, value);
 		}
-		//System.out.println("maximizer branches: " + branchesSeen);
 		return bestChild;
 	}
 
@@ -282,11 +262,8 @@ public class AIPlayer extends Player {
 		double value = Integer.MAX_VALUE;
 		MoveStateEval bestChild = null;
 
-		int branchesSeen = 0;
-
 		while (!children.isEmpty()) {
 			MoveStateEval child = children.poll();
-			branchesSeen++;
 			MoveStateEval childMax = maximizer(child, alpha, beta, depth-1, c, strategy);
 			if (childMax.eval < value || bestChild == null) {
 				bestChild = child;
@@ -294,12 +271,10 @@ public class AIPlayer extends Player {
 				value = bestChild.eval;
 			}
 			if (value <= alpha) {
-				//System.out.println("minimizer branches: " + branchesSeen);
 				return bestChild;
 			}
 			beta = Math.min(beta, value);
 		}
-		//System.out.println("minimizer branches: " + branchesSeen);
 		return bestChild;
 	}
 
@@ -311,12 +286,9 @@ public class AIPlayer extends Player {
 			chosenMove = branches.peek().move;
 		} else {
 			MoveStateEval current = new MoveStateEval(null, state, evaluate(state, color, strategy));
-			//System.out.println(state.getBoard().toString());
 			MoveStateEval next = maximizer(current, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, color, strategy);
-			//System.out.println(next.eval);
 			chosenMove = next.move;
 		}
-		//System.out.println(chosenMove);
 		executeMove(chosenMove);
 		return new ResultMove(0, chosenMove);
 	}

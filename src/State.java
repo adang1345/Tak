@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-/* A State represents the game state, which includes the inventory of each player along with the board state. */
+/** A State represents the game state, which includes the inventory of each player along with the board state. */
 public class State implements Cloneable {
 
 	/** The status of a game */
@@ -11,11 +11,11 @@ public class State implements Cloneable {
 		ONGOING, DRAW, PLAYER1_WIN, PLAYER2_WIN, ILLEGAL_MOVE, INVALID_COMMAND
 	}
 
-	private Board board;                // the game board
-	private int plies;                  // number of plies made
-	private Player player1;             // player that goes first, is white
-	private Player player2;             // player that goes second, is black
-	private Player nextPlayer;          // player that goes next
+	private Board board;                  // the game board
+	private int plies;                    // number of plies made
+	private Player player1;               // player that goes first, is white
+	private Player player2;               // player that goes second, is black
+	private Player nextPlayer;            // player that goes next
 	private ArrayList<String> allMoves;   // array of all moves made so far, represented as strings
 
 	public Board getBoard() {
@@ -35,6 +35,13 @@ public class State implements Cloneable {
 	public String getLastMove() {
 		if (allMoves.size() == 0) return "None";
 		return allMoves.get(allMoves.size() - 1);
+	}
+
+	/** Return the list of all moves as a string, where moves are separated by a new line. */
+	public String getAllMoves() {
+		String acc = "";
+		for (int i = 0; i < allMoves.size(); i++) acc += "Player " + (i % 2 + 1) + "\t" + allMoves.get(i) + "\n";
+		return acc;
 	}
 
 	public Player getPlayer1() {

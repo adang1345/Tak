@@ -7,15 +7,13 @@ public abstract class Player {
 	public static enum Strategy {
 		HUMAN,
 		RANDOM,
-		
+
 		// maximizes number of own controlled cells
 		SELFISH,
 		// minimizes opponent's controlled cells
 		ATTACKER,
 		// maximizes # own cells - # opponent's cells
 		SELFISH_ATTACKER,
-		// maximizes number of own pieces kept
-		STINGY,
 		// Maximize total number of my controlled pieces minus the total number of opponent's controlled pieces.
 		GATHERER,
 		// maximize the number of adjacent pairs of flat controlled cells (allowing double-counting)
@@ -28,7 +26,7 @@ public abstract class Player {
 	protected int capstones;  // # capstones in inventory
 	protected Stone.Color color;  // color of player
 	protected State state;  // board that this player can access
-	protected Strategy strategy; // strategy this player uses, null if human player
+	protected Strategy strategy; // strategy this player uses
 	protected int depth;
 
 	public int getStones() {

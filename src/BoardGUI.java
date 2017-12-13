@@ -91,26 +91,4 @@ public class BoardGUI extends JPanel {
 		}
 	}
 	
-	/* Update this board's display */
-	/*public void updateBoard() {
-		removeAll();
-		
-		cells = new BoardGUICell[Board.SIZE][Board.SIZE];
-		for (int i = 0; i < Board.SIZE; i++) {
-			for (int j = 0; j < Board.SIZE; j++) {
-				BoardGUICell newCell = new BoardGUICell(tak, board, i, j);
-				cells[i][j] = newCell;
-			}
-		}
-		for (int i = Board.SIZE-1; i >= 0; i--) {
-			for (int j = 0; j < Board.SIZE; j++) {
-				add(cells[i][j]);
-			}
-		}
-		
-		revalidate();
-		repaint();
-	}*/
-	
-	
 }

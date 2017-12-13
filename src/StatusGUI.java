@@ -26,8 +26,7 @@ public class StatusGUI extends JPanel {
 	public static final Border TEXTFIELD_BORDER = new LineBorder(Color.BLACK, 1);
 	public static final int PADDING = 15;
 	public static final Color PLIES_COLOR = new Color(0, 0, 102);
-	public static final int AI_DELAY = 0;  // minimum number of milliseconds AI must take to move
-
+	
 	private Tak tak;
 	private State state;
 	private JLabel nextPlayer;
@@ -184,11 +183,11 @@ public class StatusGUI extends JPanel {
 		/** Start new thread for AI player to do its thing if game is not already over. */
 		if (state.getNextPlayer() instanceof AIPlayer &&
 				(state.getStatus(state.getPrevPlayer()) == State.GameStatus.ONGOING)) {
-			SwingUtilities.invokeLater(new Runnable() {
+			new Thread(new Runnable() {
 				public void run() {
 					autoMove();
 				}
-			});
+			}).start();
 		}
 	}
 
@@ -196,12 +195,7 @@ public class StatusGUI extends JPanel {
 	 * Precondition: the next player is an AIPlayer and the game is not yet over */
 	private void autoMove() {
 		if (!(state.getNextPlayer() instanceof AIPlayer)) throw new RuntimeException("can't autostart human player");
-		long startTime = System.currentTimeMillis();
 		State.GameStatus gs = state.makeMove(this);
-		long endTime = System.currentTimeMillis();
-		try {
-			TimeUnit.MILLISECONDS.sleep(AI_DELAY - startTime + endTime);
-		} catch (InterruptedException e) {}
 		switch (gs) {
 		case PLAYER1_WIN:
 			statusMsg = "Player 1 Wins";
@@ -220,9 +214,13 @@ public class StatusGUI extends JPanel {
 		default:
 			statusMsg = "Internal Error for AI Move";
 		}
-		tak.updateBoard();
-		tak.updateStack();
-		updateStatus();
+		SwingUtilities.invokeLater(new Runnable () {
+			public void run() {
+				tak.updateBoard();
+				tak.updateStack();
+				updateStatus();
+			}
+		});
 	}
 
 }
