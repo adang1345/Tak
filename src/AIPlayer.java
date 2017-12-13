@@ -226,6 +226,10 @@ public class AIPlayer extends Player {
 	/** Return the MoveStateEval that maximizes the utility according to minimax search with the specified depth,
 	 * which represents the number of additional plies of depth to search. A depth of 0 means that we return immediately
 	 * with the current state and its evaluation.
+	 * 
+	 * Acknowledgment: This algorithm was written with inspiration from the minimax algorithm on p. 170 of Artificial
+	 * Intelligence, A Modern Approach (3rd edition) by Russell and Norvig
+	 * 
 	 * Precondition: d >= 0; mse has no null fields */
 	private static MoveStateEval maximizer(MoveStateEval mse, double alpha, double beta, int depth, Stone.Color c, Player.Strategy strategy) {
 		// terminal cases

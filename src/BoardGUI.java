@@ -9,7 +9,7 @@ import javax.swing.border.LineBorder;
 /* The GUI for the board */
 public class BoardGUI extends JPanel {
 	
-	private static class BoardGUICell extends JButton {
+	public static class BoardGUICell extends JButton {
 		public static final Color BACKGROUND_COLOR = new Color(0, 204, 255);
 		public static final LineBorder BORDER = new LineBorder(Color.BLACK);
 		

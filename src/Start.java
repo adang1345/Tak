@@ -1,21 +1,28 @@
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 /** Ask the user for preferences and start a Tak game. */
 public class Start extends JFrame {
 
-	public static final String[] STRATEGIES1 = new String[] {"-Select Player 1-", "Human", "Random", "Selfish",
+	public static final String[] STRATEGIES1 = new String[]
+			{"<html><p style=\"color:red\">-Select Player 1 (White)-</p></html>", "Human", "Random", "Selfish",
 			"Attacker", "SelfishAttacker", "Gatherer", "ClusterBuilder", "ClusterBuilderGatherer"};
-	public static final String[] DEPTH1 = new String[] {"-Select Player 1 Depth-", "1", "2", "3", "4", "5"};
-	public static final String[] STRATEGIES2 = new String[] {"-Select Player 2-", "Human", "Random", "Selfish",
+	public static final String[] DEPTH1 = new String[]
+			{"-Select Player 1 Depth-", "1", "2", "3", "4", "5"};
+	public static final String[] STRATEGIES2 = new String[]
+			{"<html><p style=\"color:red\">-Select Player 2 (Black)-</p></html>", "Human", "Random", "Selfish",
 			"Attacker", "SelfishAttacker", "Gatherer", "ClusterBuilder", "ClusterBuilderGatherer"};
-	public static final String[] DEPTH2 = new String[] {"-Select Player 2 Depth-", "1", "2", "3", "4", "5"};
+	public static final String[] DEPTH2 = new String[]
+			{"-Select Player 2 Depth-", "1", "2", "3", "4", "5"};
+	public static final Font TEXT_FONT = new Font("Arial", Font.BOLD, 15);
 
 	JComboBox<String> player1Strategy;
 	JComboBox<String> player1Depth;
@@ -31,6 +38,9 @@ public class Start extends JFrame {
 
 		player1Strategy = new JComboBox<String>(STRATEGIES1);
 		player1Strategy.setForeground(Color.BLACK);
+		player1Strategy.setFont(TEXT_FONT);
+		player1Strategy.setBackground(Color.WHITE);
+		player1Strategy.setBorder(BorderFactory.createRaisedBevelBorder());
 		player1Strategy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				start.setEnabled(readyToPlay());
@@ -47,6 +57,8 @@ public class Start extends JFrame {
 		player1Depth = new JComboBox<String>(DEPTH1);
 		player1Depth.setForeground(Color.BLACK);
 		player1Depth.setEnabled(false);
+		player1Depth.setFont(TEXT_FONT);
+		player1Depth.setBackground(Color.WHITE);
 		player1Depth.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				start.setEnabled(readyToPlay());
@@ -56,6 +68,9 @@ public class Start extends JFrame {
 
 		player2Strategy = new JComboBox<String>(STRATEGIES2);
 		player2Strategy.setForeground(Color.BLACK);
+		player2Strategy.setFont(TEXT_FONT);
+		player2Strategy.setBackground(Color.WHITE);
+		player2Strategy.setBorder(BorderFactory.createRaisedBevelBorder());
 		player2Strategy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				start.setEnabled(readyToPlay());
@@ -72,6 +87,8 @@ public class Start extends JFrame {
 		player2Depth = new JComboBox<String>(DEPTH2);
 		player2Depth.setForeground(Color.BLACK);
 		player2Depth.setEnabled(false);
+		player2Depth.setFont(TEXT_FONT);
+		player2Depth.setBackground(Color.WHITE);
 		player2Depth.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				start.setEnabled(readyToPlay());
@@ -79,9 +96,12 @@ public class Start extends JFrame {
 		});
 		add(player2Depth);
 
-		start = new JButton("Start Game");
+		start = new JButton("Start Tak");
 		start.setForeground(Color.BLACK);
+		start.setFont(TEXT_FONT);
+		start.setBackground(BoardGUI.BoardGUICell.BACKGROUND_COLOR);
 		start.setEnabled(false);
+		start.setBorder(BorderFactory.createRaisedBevelBorder());
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String p1type = (String) player1Strategy.getSelectedItem();
